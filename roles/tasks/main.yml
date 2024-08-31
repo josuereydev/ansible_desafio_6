@@ -1,0 +1,49 @@
+---
+- name: Instalar servicio Apache
+  include_tasks: includes/install-apache2.yml
+
+- name: Crear directorio para el sitio
+  file:
+    path: "{{ site_dir }}"
+    state: directory
+    owner: www-data
+    group: www-data
+  when: is_ubuntu
+
+- name: Copiar index.html al directorio del sitio
+  copy:
+    src: index.html
+    dest: "{{ site_dir }}/index.html"
+    owner: www-data
+    group: www-data
+    mode: '0644'
+  when: is_ubuntu
+
+- name: Configuración del sitio Apache
+  template:
+    src: ansible_site.conf.j2
+    dest: /etc/apache2/sites-available/ansible_site.conf
+  notify:
+    - Reload Apache
+  when: is_ubuntu
+
+- name: Activar el nuevo sitio
+  command: a2ensite ansible_site.conf
+  notify:
+    - Reload Apache
+  when: is_ubuntu
+
+- name: Deshabilitar el sitio default
+  command: a2dissite 000-default.conf
+  notify:
+    - Reload Apache
+  when: is_ubuntu
+
+- name: Cambiar el e-mail del webmaster
+  lineinfile:
+    path: /etc/apache2/sites-available/000-default.conf
+    regexp: 'ServerAdmin webmaster@localhost'
+    line: '    ServerAdmin webmaster@educacionit.com'
+  when: is_ubuntu
+  notify:
+    - Reload Apache
