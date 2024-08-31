@@ -1,0 +1,12 @@
+---
+- name: Deployment de un sitio estático
+  hosts: webservers
+  become: yes
+  pre_tasks:
+    - name: Verificar si el OS es Ubuntu
+      set_fact:
+        is_ubuntu: "{{ ansible_distribution == 'Ubuntu' }}"
+  vars_files:
+    - vars/vars-site.yml
+  roles:
+    - static_site
