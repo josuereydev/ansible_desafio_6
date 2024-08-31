@@ -1,0 +1,6 @@
+---
+- name: Instalar Apache2
+  apt:
+    name: apache2
+    state: present
+    update_cache: yes
